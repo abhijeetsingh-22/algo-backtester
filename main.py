@@ -1,4 +1,5 @@
 # %%
+# Main file to integrate and run all the components of the system
 import calendar
 import queue
 from strategies.FarOtmStrangle import FarOtmStrangle
@@ -65,7 +66,6 @@ sl_percent = 50
 initial_capital = 150000  # 400000
 # total = initial_capital
 max_loss_per_day_percent = 1
-# max_loss_per_day = max_loss_per_day_percent*initial_capital/100
 
 # start_time = datetime.datetime(2018, 8, 16, 9, 15)  # 2018,8,10
 # end_time = datetime.datetime(2019, 1, 5, 15, 30)  # 2020,11,26
@@ -93,36 +93,3 @@ portfolio.strategy_name = strategy.name
 broker = SimulateExecutionHandler(events, data, True)
 # %%
 backtest(events, data, portfolio, strategy, broker)
-# %%
-portfolio.
-# %%
-portfolio.equity_curve.index[1].day
-
-# %%
-while(period_start <= end_time):
-    path = data_path[data_path['period'] ==
-                     period_start.strftime('%Y-%m')].iloc[0]['path']
-    data = pd.read_pickle(path)
-    if(len(data) > 0):
-        for index, row in data.iterrows():
-            cur_time = row['datetime']
-            cur_date = cur_time.date()
-            if(cur_time > end_time):
-                break
-            if(cur_time < start_time):
-                portfolio.update_portfolio(row)
-                continue
-            portfolio.check_position_status(row)
-            portfolio.update_portfolio(row)
-            strategy.calculate_signal(row)
-
-    period_start = period_start + \
-        datetime.timedelta(days=calendar.monthrange(
-            period_start.year, period_start.month)[1])
-print(f'time taken {time.time()-s}')
-# %%
-stats = portfolio.summary_stats()
-
-for stat in stats:
-    print(stat[0] + ": " + stat[1])
-portfolio.plot_all()

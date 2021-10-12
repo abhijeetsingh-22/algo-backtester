@@ -23,7 +23,7 @@ class BnfStraddle():
     def calculate_signal(self, row):
         if(row['datetime'].weekday() != 3):
             if(self.portfolio.can_trade_today):
-                if(row['time'].minute == 0):
+                if(row['time'].minute == 0):  # trailing the sl after each hour
                     cur_combined_premium = 0
                     for symbol in self.portfolio.positions:
                         cur_combined_premium += row[symbol]
@@ -39,6 +39,8 @@ class BnfStraddle():
                 for d in self.portfolio.history:
                     low = min(d[self.instrument], low)
                     high = max(d[self.instrument], high)
+
+                # Enter only if BNF is trading in previous day's range
                 if(high < previous_day_data['high'] and low > previous_day_data['low']):
                     # print(row['datetime'], '@@In range')
                     current_expiry = get_current_weekly_expiry(
@@ -54,10 +56,13 @@ class BnfStraddle():
                         atm_strike, 'CE', current_expiry, self.instrument)]+row[generate_current_week_option_symbol(
                             atm_strike, 'PE', current_expiry, self.instrument)]
                     # print(combined_premium)
+
+                    # Set combined premium SL
                     sl = 0.1*combined_premium+combined_premium
                     self.portfolio.set_sl_premium(sl)
                 else:
                     print(f"{row['datetime']}: not in range")
+            # Exit at intraday Squareoff time
             if(row['time'] == datetime.time(15, 14)):
                 self.positions = []
                 for symbol in self.portfolio.positions:

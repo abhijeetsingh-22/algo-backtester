@@ -33,9 +33,11 @@ class FarOtmStrangle(Strategy):
             ltp = res[0]['ltp']
             current_datetime = self.data.current_time
             current_time = current_datetime.time()
+
+            # Reset positions for the day before entering
             if(current_time >= time(9, 15) and current_time <= time(9, 20)):
                 self.positions = {}
-
+            # Check for SL at each data event ( should move this block to the broker section. Here temp)
             if(current_time > time(9, 25) and current_time < time(15, 20)):
                 sl_symbol = None
                 for symbol in self.positions:
@@ -65,11 +67,12 @@ class FarOtmStrangle(Strategy):
                                 self.positions[symbol]['sl'] = sl
                                 print(
                                     f"{current_datetime} - Trailed SL for {symbol} to {sl}")
-
+            # Entry conditions
             if(current_time >= time(9, 45) and len(self.positions) == 0):
                 try:
                     self.positions = {}
 
+                    # Find strike by premium and then generate symbol for it
                     pe_strike = self.data.find_strike(30, 'PE',)
                     pe_symbol = generate_current_week_option_symbol(
                         pe_strike, 'PE', self.data.current_weekly_expiry, 'BANKNIFTY')
@@ -88,6 +91,7 @@ class FarOtmStrangle(Strategy):
                     self.events.put(signal)
                 except Exception:
                     pass
+            # Trailing SL at 1:30 and 2:30
             if(current_time == time(13, 30) or current_time == time(14, 30)):
                 for symbol in self.positions:
                     position = self.positions[symbol]
@@ -101,7 +105,7 @@ class FarOtmStrangle(Strategy):
                             self.positions[symbol]['sl'] = sl
                             print(
                                 f"{current_datetime} - Trailed SL for {symbol} to {sl}")
-
+            # Exit at 3:20
             if(current_time == time(15, 20)):
                 for symbol in self.positions:
                     if(self.positions[symbol]['sell_qty'] != 0):
